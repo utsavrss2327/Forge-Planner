@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { isGoogleProviderEnabled } from "@/lib/auth/google-provider";
 import { siteOrigin } from "@/lib/auth/oauth";
 import { field } from "@/lib/validation";
 import { redirect } from "next/navigation";
@@ -114,7 +115,10 @@ export async function requestPasswordResetAction(formData: FormData) {
   const email = field(formData, "email").trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Enter a valid email address." };
   if (!isSupabaseConfigured()) return { error: "Password recovery requires Supabase. Demo accounts have no passwords to recover." };
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+    (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}` : undefined) ||
+    (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : undefined) ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
   if (!siteUrl) return { error: "Set NEXT_PUBLIC_SITE_URL to configure recovery links." };
   let recoveryUrl: string;
   try {
@@ -146,9 +150,14 @@ export async function resetPasswordAction(formData: FormData) {
 export async function googleSignInAction(destination = "/dashboard") {
   if (!isSupabaseConfigured()) return { error: "Google sign-in requires Supabase configuration and an enabled Google provider. Demo mode cannot sign in with Google." };
   if (!["/dashboard", "/settings"].includes(destination)) return { error: "Invalid sign-in destination." };
-  const origin = siteOrigin(process.env.NEXT_PUBLIC_SITE_URL);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+    (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}` : undefined) ||
+    (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : undefined) ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+  const origin = siteOrigin(siteUrl);
   if (!origin) return { error: "Set NEXT_PUBLIC_SITE_URL to your app URL, such as http://localhost:3000, before using Google sign-in." };
   try {
+    if (!await isGoogleProviderEnabled()) return { error: "Google sign-in is not enabled for this Supabase project yet. Add your Google OAuth client ID and secret in Supabase, then enable the Google provider." };
     const supabase = await createClient();
     const callback = new URL("/auth/callback", origin); callback.searchParams.set("next", destination);
     const { data, error } = await supabase.auth.signInWithOAuth({
