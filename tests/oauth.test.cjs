@@ -8,8 +8,9 @@ function withEnv(values, run) {
   for (const [key, value] of Object.entries(values)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; }
   return Promise.resolve().then(run).finally(() => { for (const [key, value] of Object.entries(previous)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; } });
 }
-function actions(configured, auth) {
+function actions(configured, auth, providerEnabled = true) {
   return load('src/app/(auth)/actions.ts', {
+    '@/lib/auth/google-provider': { isGoogleProviderEnabled: async () => providerEnabled },
     'next/navigation': { redirect() { throw new Error('Unexpected redirect'); } }, 'next/headers': {},
     '@/lib/supabase/middleware': { isSupabaseConfigured: () => configured }, '@/lib/supabase/server': { createClient: async () => ({ auth }) },
   });
@@ -63,4 +64,27 @@ test('Google-only deletion requires recent verified OAuth claims for this user, 
   assert.equal(oauth.isGoogleOnlyAccount({ identities: [{ provider: 'google' }, { provider: 'email' }] }), false);
   assert.equal(oauth.hasRecentGoogleAuthentication({ sub: 'owner', amr: [{ method: 'oauth', timestamp: 900 }] }, 'owner', 1000), true);
   for (const claims of [{ sub: 'other', amr: [{ method: 'oauth', timestamp: 900 }] }, { sub: 'owner', amr: [{ method: 'oauth', timestamp: 600 }] }, { sub: 'owner', amr: [{ method: 'token_refresh', timestamp: 999 }] }, { sub: 'owner', amr: ['oauth'] }]) assert.equal(oauth.hasRecentGoogleAuthentication(claims, 'owner', 1000), false);
+});
+
+
+test('a configured project with Google disabled stays in the app instead of redirecting to an API error', async () => {
+  await withEnv({ NEXT_PUBLIC_SITE_URL: 'http://localhost:3000', NEXT_PUBLIC_SUPABASE_URL: 'https://project.supabase.co' }, async () => {
+    let redirects = 0;
+    const result = await actions(true, { signInWithOAuth: async () => { redirects++; } }, false).googleSignInAction();
+    assert.match(result.error, /not enabled/); assert.equal(redirects, 0);
+  });
+});
+
+test('Google provider discovery uses the public settings endpoint and rejects unavailable responses', async () => {
+  await withEnv({ NEXT_PUBLIC_SUPABASE_URL: 'https://project.supabase.co', NEXT_PUBLIC_SUPABASE_ANON_KEY: 'public-key' }, async () => {
+    const provider = load('src/lib/auth/google-provider.ts', { 'server-only': {} });
+    const enabled = await provider.isGoogleProviderEnabled(async (url, options) => {
+      assert.equal(url.toString(), 'https://project.supabase.co/auth/v1/settings');
+      assert.equal(options.headers.apikey, 'public-key'); assert.equal(options.cache, 'no-store');
+      return Response.json({ external: { google: true } });
+    });
+    assert.equal(enabled, true);
+    assert.equal(await provider.isGoogleProviderEnabled(async () => Response.json({ external: { google: false } })), false);
+    await assert.rejects(provider.isGoogleProviderEnabled(async () => new Response('{}', { status: 503 })));
+  });
 });

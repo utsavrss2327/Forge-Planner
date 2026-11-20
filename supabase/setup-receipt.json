@@ -1,0 +1,39 @@
+{
+  "project": "zcgsdaboiqrrzxdfturq",
+  "verifiedAt": "2026-11-20T07:51:36.211Z",
+  "deployment": "Existing schema verified; migration history recorded without rerunning SQL",
+  "sourceSha256": "e7f4ba874204dd86ebf66e153540291df4375f9d5be63d7202bed9bd8cfb707f",
+  "matchingFunctionCount": 14,
+  "executionGrantsVerified": true,
+  "appliedMigration": {
+    "version": "20261120074952",
+    "name": "forge_foundation_00001_to_00005"
+  },
+  "database": {
+    "table_count": 21,
+    "rls_table_count": 21,
+    "policy_count": 23,
+    "app_user_count": 0
+  },
+  "features": {
+    "timer_seconds": true,
+    "single_session_index": true,
+    "signup_trigger": true
+  },
+  "auth": {
+    "siteUrl": "http://localhost:3000",
+    "localhostCallbackConfigured": true,
+    "googleEnabled": false,
+    "googleClientIdConfigured": false,
+    "googleSecretConfigured": false
+  },
+  "securityHardening": {
+    "file": "00006_rpc_execution_grants.sql",
+    "sourceSha256": "6799a8483a0ca271ace0153f797399ae6242dae938320f99a81635061595b707",
+    "version": "20261120075135",
+    "name": "00006_rpc_execution_grants",
+    "verifiedRPCCount": 12,
+    "anonymousExecutionAllowed": false,
+    "authenticatedExecutionAllowed": true
+  }
+}

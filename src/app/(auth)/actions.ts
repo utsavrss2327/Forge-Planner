@@ -166,7 +166,7 @@ export async function googleSignInAction(destination = "/dashboard") {
     });
     if (error || !data.url) return { error: "Google sign-in is unavailable. Enable the Google provider in Supabase and check its client credentials and redirect URLs." };
     // Redirect only to the Auth endpoint of the configured project.
-    const authorize = new URL(data.url), project = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!);
+    const authorize = new URL(data.url), project = new URL((process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL)!);
     if (authorize.origin !== project.origin || authorize.pathname !== "/auth/v1/authorize" || authorize.searchParams.get("provider") !== "google") {
       return { error: "The authentication service returned an unexpected sign-in URL. Check your Supabase configuration." };
     }

@@ -30,7 +30,7 @@ Complete remaining **foundation** increments sequentially: identity/preferences,
 
 ## Current checkpoint
 
-Supabase public connection is configured, but the live profiles endpoint still returns PGRST205 and Google remains disabled. Browser control is unavailable. A Supabase plugin has been found and suggested but is not yet confirmed installed/connected. Resume from the final plugin-connection entry, discover its actual tools after connection, and inspect the project before applying the prepared bootstrap. No remote migration or callback change has been submitted by this agent.
+Management token is valid. Hosted database and callback setup are verified: 21 RLS-enabled tables, 23 policies, 14 matching function bodies and restricted execution on all 12 app RPCs. Existing schema was preserved and migration metadata recorded; see supabase/setup-receipt.json. Google remains disabled because its OAuth client ID/secret are not configured. Resume from the final Google-client setup instructions below. Never print credentials.
 
 ## External requirements
 
@@ -169,3 +169,34 @@ Bootstrap SHA256 at checkpoint: `e7f4ba874204dd86ebf66e153540291df4375f9d5be63d7
 - Resume after the user installs/connects Supabase: discover the actual plugin tools, verify project zcgsdaboiqrrzxdfturq and inspect current schema, then apply the reviewed migrations using the authorized connector and verify all 21 tables have RLS. Inspect available Auth configuration capabilities rather than assuming them. Google OAuth client credentials still need user setup directly in Supabase.
 
 Bootstrap unchanged at checkpoint: True; includes current migration sources: True.
+
+
+Applying RPC execution-grant hardening through the Management API at 2026-11-20T07:48:38.726Z. This revokes PUBLIC/anon invocation of the 12 app RPCs and preserves authenticated execution; it changes no function bodies or user rows.
+
+RPC grant hardening verified at 2026-11-20T07:48:41.776Z: all 12 application RPCs deny anon execution and retain authenticated execution. Migration source: 00006_rpc_execution_grants.sql. Migration history still needs metadata registration; no tables or user records were recreated.
+
+
+Existing hosted schema verified at 2026-11-20T07:49:53.358Z: 21 tables with RLS, 23 policies, all 14 function bodies matching source and RPC execution grants restricted to authenticated callers. Recorded migration metadata 20261120074952 (forge_foundation_00001_to_00005) through the metadata-only API; did not rerun SQL. Receipt: supabase/setup-receipt.json.
+
+Grant-hardening migration metadata recorded as 20261120075135 (00006_rpc_execution_grants) at 2026-11-20T07:51:36.211Z. Both migration records verified without rerunning schema SQL; receipt updated.
+
+
+### Management API access verified; live database setup completed (2026-11-20)
+
+- User saved SUPABASE_ACCESS_TOKEN locally and requested a check. Token access to Auth config, SQL metadata and migration history succeeded; no token or provider secret was printed.
+- Current hosted state had already changed: 21 public tables, all with RLS, 23 policies, 0 app users, and the exact localhost callback saved. Preserved that installation; did not rerun the bootstrap. All 14 foundation function bodies matched the migration source.
+- Detected a hosted-default privilege difference: explicit anon EXECUTE grants survived the original PUBLIC revocations. Added/tested 00006_rpc_execution_grants.sql, applied its grant narrowing in one transaction, and verified all 12 app RPCs reject anon execution while retaining authenticated access. No function bodies or user rows changed; no account/data deletion function was invoked.
+- Registered the existing foundation bundle and grant correction through the official metadata-only migration API. Verified history entries: 20261120074952 forge_foundation_00001_to_00005; 20261120075135 00006_rpc_execution_grants. Receipt: supabase/setup-receipt.json. Original short-numbered local migration files do not directly match these generated bundle versions; reconcile history before future Supabase CLI db push.
+- Live Data API verification: profiles endpoint HTTP 200; anonymous export RPC HTTP 401 (denied). Auth config confirms localhost site/callback, Google disabled, and no Google client ID or client secret.
+- Added a server-side provider-enabled check so Google login stays in FORGE with a clear configuration message instead of redirecting to a disabled-provider API error. Added regressions for enabled/disabled/unavailable provider discovery.
+- Executed: npm test 44 passed; npx tsc --noEmit passed; scoped ESLint over all changed auth/provisioning/test files passed; npm run build passed. Full-repository lint was not re-claimed as passing; unrelated earlier module issues remain outside this setup change.
+- Updated setup documentation and environment example. Management token remains local/ignored and is used only for provisioning, never browser configuration.
+
+Resume here: Supabase access, database setup, migration bookkeeping and localhost callback are verified. Google OAuth client creation is the remaining blocker. The user needs a Web application OAuth client in Google Auth Platform, with JavaScript origin http://localhost:3000 and authorized redirect https://zcgsdaboiqrrzxdfturq.supabase.co/auth/v1/callback. Enter its ID/secret directly in this Supabase project's Google provider settings and enable it. Then recheck Auth settings and have the user complete a real Google sign-in from localhost to verify session/onboarding. Do not claim Google login is live yet. No Supabase plugin or browser control is required for the remaining read-only Management API checks.
+
+### Production deployment inspection — 2026-11-20
+
+- User supplied https://forge-planner-22.vercel.app/ for review. Read-only HTTP checks: / and /login return 200; /dashboard redirects 307 to /login. Landing and Google login UI are served.
+- /auth/callback without a code redirects to /login?error=oauth_setup. In current source that branch specifically means isSupabaseConfigured() is false, indicating production Supabase URL/public-key configuration is missing or invalid (rather than the expected missing-code error). Production environment itself was not accessible to inspect; no real Google login was completed.
+- Read-only Management API confirms Google is now enabled and client ID/secret are present. Production callback https://forge-planner-22.vercel.app/auth/callback is allow-listed. Supabase Site URL still points to the different forge-planner-utsavrss2327s-projects.vercel.app hostname.
+- Next step: set Vercel Production NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY (public publishable key), NEXT_PUBLIC_SITE_URL=https://forge-planner-22.vercel.app, FORGE_DEMO_MODE=false; redeploy because NEXT_PUBLIC values are baked into the build. Align Supabase Site URL with this production domain, then verify a real Google sign-in. No remote configuration changes made during inspection.

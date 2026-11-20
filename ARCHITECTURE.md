@@ -25,3 +25,10 @@ Planner mutations lock the profile row per user, then the affected task. This se
 Exports and preparation reset run under invoker permissions/RLS. Full account deletion is the sole new definer RPC: fixed empty search path, no caller-supplied user ID, authenticated-only execute, and deletion restricted to `auth.uid()`. The server action requires current-password verification before calling it. External Storage/Auth-service behavior remains a hosted integration check.
 
 The local SQL test harness runs migrations unchanged in PGlite with an Auth-schema/identity fixture and a non-superuser authenticated role. Playwright builds an isolated credential-free app and tests a temporary demo store; it does not validate hosted Supabase Auth or actual YouTube playback.
+
+
+## Hosted privilege verification
+
+Supabase can assign explicit EXECUTE grants to the anon role through default privileges; revoking PUBLIC alone does not remove those grants. Migration 00006 revokes both PUBLIC and anon access to the twelve application RPCs and retains authenticated execution. Database tests reproduce the hosted default and verify the restriction. New RPC migrations must revoke both roles explicitly.
+
+Local provisioning reads the management token only from the ignored environment file. The project setup helper checks the exact project, source fingerprints and hosted state before recording existing migration metadata; it does not expose credentials or rerun a populated schema. The deployment receipt records non-secret verification results. Google provider settings are checked server-side before redirecting so a disabled provider produces an actionable in-app error.

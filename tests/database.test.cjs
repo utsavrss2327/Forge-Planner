@@ -15,6 +15,8 @@ test('foundation migrations, row isolation and transactional workflows in Postgr
       CREATE TABLE auth.users(id uuid PRIMARY KEY, raw_user_meta_data jsonb DEFAULT '{}', email text);
       CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub', true),'')::uuid $$;
       GRANT USAGE ON SCHEMA public, auth TO authenticated; GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated;`);
+    // Reproduce Supabase's explicit anon grants, which survive REVOKE FROM PUBLIC.
+    await db.exec('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon');
     for (const file of fs.readdirSync('supabase/migrations').filter((f) => f.endsWith('.sql')).sort()) await db.exec(fs.readFileSync(`supabase/migrations/${file}`, 'utf8'));
     await db.exec('GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated');
     await db.query('INSERT INTO auth.users(id) VALUES ($1), ($2)', [A, B]);
@@ -24,6 +26,14 @@ test('foundation migrations, row isolation and transactional workflows in Postgr
     const track = { id: TRACK, user_id: A, title: 'Owned track', description: null, subject: 'DBMS', target_outcome: null, start_date: '2026-11-23', deadline: null, priority: 'high', daily_goal: null, weekly_goal: null, resource_links: [], status: 'active', notes: null, total_items: 1, completed_items: 0, created_at: now, updated_at: now };
     const playlist = { id: PLAYLIST, user_id: A, learning_track_id: TRACK, playlist_id: 'PLabcdefghijk', title: 'Real imported metadata fixture', description: null, thumbnail_url: null, total_videos: 1, completed_videos: 0, created_at: now, updated_at: now };
     const video = { id: VIDEO, playlist_id: PLAYLIST, video_id: 'abc12345678', title: 'Concept', thumbnail_url: null, duration_seconds: null, order_index: 0, status: 'not_started', difficulty_rating: null, topics_learned: [], notes: null, last_studied_at: null, completed_at: null, created_at: now, updated_at: now };
+    await t.test('explicit Supabase anon defaults are revoked for all application RPCs', async () => {
+      const rows = await query("SELECT p.proname AS name,has_function_privilege('anon',p.oid,'EXECUTE') AS anon_execute,has_function_privilege('authenticated',p.oid,'EXECUTE') AS authenticated_execute FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname NOT LIKE 'handle_%'");
+      assert.equal(rows.length, 12);
+      assert.ok(rows.every((row) => !row.anon_execute && row.authenticated_execute));
+      await db.exec('SET ROLE anon');
+      await assert.rejects(db.exec('select export_preparation_data()'), (error) => error.code === '42501');
+      await owner(A);
+    });
     await t.test('atomic learning creation rolls back a malformed child and accepts valid records', async () => {
       await assert.rejects(db.query('select create_learning_track($1,$2,$3)', [track, playlist, [{ ...video, playlist_id: B }]]));
       assert.equal((await query('select count(*)::int n from learning_tracks'))[0].n, 0);
