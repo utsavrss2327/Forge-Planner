@@ -1,0 +1,43 @@
+{
+  "project": "zcgsdaboiqrrzxdfturq",
+  "applied": [
+    {
+      "name": "00007_routine_planning",
+      "version": "20261121055552",
+      "sha256": "cbdeaac18e1d670da1384847c0f6bc05ba561b6fd53a962b66f8d72fd65f93ec",
+      "appliedAt": "2026-11-21T05:55:53.937Z"
+    },
+    {
+      "name": "00008_grounded_assessments",
+      "version": "20261121055555",
+      "sha256": "33f51a05ddc25e968ad6b09d25dcba74c9568f8b2f49fb6fb3932df2e0c1dc36",
+      "appliedAt": "2026-11-21T05:55:57.634Z"
+    },
+    {
+      "name": "00009_routine_task_guards",
+      "version": "20261121063616",
+      "sha256": "6d2902fe57ee5fb4f301bd4af67f6a7201bd23706d3a8938637c44451212ad35",
+      "appliedAt": "2026-11-21T06:36:20.978Z"
+    }
+  ],
+  "verifiedAt": "2026-11-21T06:36:21.777Z",
+  "database": {
+    "tables": 23,
+    "rls_tables": 23
+  },
+  "accessVerification": {
+    "tables": 23,
+    "rls_tables": 23,
+    "authenticated_can_read_keys": false,
+    "authenticated_can_read_questions": true,
+    "authenticated_can_finalize": false,
+    "service_can_finalize": true,
+    "anon_can_execute_new_rpcs": false
+  },
+  "accessVerifiedAt": "2026-11-21T05:59:13.257Z",
+  "taskGuardVerification": {
+    "task_guard_enabled": true,
+    "anon_can_invoke_guard": false
+  },
+  "taskGuardVerifiedAt": "2026-11-21T06:50:37.642Z"
+}

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { BookOpen, Sparkles, Code, HelpCircle, CheckCircle2 } from "lucide-react";
+import { saveJournalEntryAction } from "@/app/(app)/learning/actions";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,18 +9,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { saveJournalEntryAction } from "@/app/(app)/learning/actions";
+import {
+  BookOpen,
+  CheckCircle2,
+  Code,
+  HelpCircle,
+  Sparkles,
+} from "lucide-react";
+import { useState } from "react";
 
 interface JournalModalProps {
   trackId?: string;
+  tracks?: { id: string; title: string; subject: string | null }[];
   triggerButton?: React.ReactNode;
 }
 
-export function JournalModal({ trackId, triggerButton }: JournalModalProps) {
+export function JournalModal({
+  trackId,
+  tracks = [],
+  triggerButton,
+}: JournalModalProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -36,11 +47,20 @@ export function JournalModal({ trackId, triggerButton }: JournalModalProps) {
     setError("");
     try {
       const result = await saveJournalEntryAction(formData);
-      if (result.error) { setError(result.error); return; }
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
       setSaved(true);
-      setTimeout(() => { setSaved(false); setOpen(false); }, 1200);
-    } catch { setError("Could not save your reflection. Please retry."); }
-    finally { setLoading(false); }
+      setTimeout(() => {
+        setSaved(false);
+        setOpen(false);
+      }, 1200);
+    } catch {
+      setError("Could not save your reflection. Please retry.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -61,7 +81,8 @@ export function JournalModal({ trackId, triggerButton }: JournalModalProps) {
             Daily Learning Reflection & Concept Journal
           </DialogTitle>
           <p className="text-xs text-text-muted">
-            Save concepts and uncertainties as source material for future recall assessments.
+            Save concepts and uncertainties as source material for future recall
+            assessments.
           </p>
         </DialogHeader>
 
@@ -70,14 +91,35 @@ export function JournalModal({ trackId, triggerButton }: JournalModalProps) {
             <div className="inline-flex p-3 rounded-full bg-success/10 text-success">
               <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h3 className="text-base font-bold text-text-primary">Journal Saved Successfully!</h3>
+            <h3 className="text-base font-bold text-text-primary">
+              Journal Saved Successfully!
+            </h3>
             <p className="text-xs text-text-muted">
               Your notes have been recorded for review and future assessments.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-            {error && <p role="alert" className="text-sm text-primary">{error}</p>}
+            {!trackId && (
+              <label className="block text-sm">
+                Subject track (for assessments)
+                <select name="trackId" className="forge-input">
+                  <option value="">
+                    General reflection — not subject-assessed
+                  </option>
+                  {tracks.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.subject}: {t.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {error && (
+              <p role="alert" className="text-sm text-primary">
+                {error}
+              </p>
+            )}
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-text-primary">
                 Executive Summary: What did you learn or solve today? *
@@ -149,7 +191,12 @@ export function JournalModal({ trackId, triggerButton }: JournalModalProps) {
               >
                 Cancel
               </Button>
-              <Button type="submit" size="sm" disabled={loading} className="gap-1.5 font-semibold">
+              <Button
+                type="submit"
+                size="sm"
+                disabled={loading}
+                className="gap-1.5 font-semibold"
+              >
                 {loading ? "Recording Entry..." : "Save Learning Entry"}
                 <CheckCircle2 className="h-3.5 w-3.5" />
               </Button>

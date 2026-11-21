@@ -1,63 +1,37 @@
 "use server";
-
+import { studyDate } from "@/lib/dates";
+import { learningContext } from "@/lib/storage/learning";
+import { readPlacement } from "@/lib/storage/placement";
+import { readProfile } from "@/lib/storage/profile";
 import { revalidatePath } from "next/cache";
-import { getStore, saveStore } from "@/lib/storage/store";
-import { performanceAnalyst } from "@/lib/ai";
-import type { RevisionItem } from "@/types";
-
 export async function getRevisionDataAction() {
-  const store = getStore();
-  const today = new Date().toISOString().split("T")[0];
-
-  const dueItems = store.revisionItems.filter(
-    (item) => item.next_review_date <= today && item.status === "active"
-  );
-  const upcomingItems = store.revisionItems.filter(
-    (item) => item.next_review_date > today && item.status === "active"
-  );
-
+  const r = await readPlacement(),
+    p = await readProfile(),
+    today = studyDate(p?.timezone);
   return {
-    dueItems,
-    upcomingItems,
-    allCount: store.revisionItems.length,
-    completedToday: store.revisionItems.filter((i) => i.updated_at.startsWith(today) && i.repetitions > 0).length,
+    dueItems: r.revisions.filter(
+      (i) => i.status === "active" && i.next_review_date <= today,
+    ),
+    upcomingItems: r.revisions.filter(
+      (i) => i.status === "active" && i.next_review_date > today,
+    ),
+    allCount: r.revisions.length,
+    completedToday: r.revisions.filter(
+      (i) =>
+        studyDate(p?.timezone, new Date(i.updated_at)) === today &&
+        i.repetitions > 0,
+    ).length,
   };
 }
-
-export async function rateRevisionItemAction(itemId: string, quality: number) {
-  const store = getStore();
-  const item = store.revisionItems.find((r) => r.id === itemId);
-  if (!item) return { error: "Item not found" };
-
-  const { newInterval, newEaseFactor } = performanceAnalyst.calculateSpacedRepetitionInterval(
-    item.interval_days,
+export async function rateRevisionItemAction(id: string, quality: number) {
+  if (!Number.isInteger(quality) || quality < 0 || quality > 5)
+    return { error: "Rate recall from 0 to 5." };
+  const { db } = await learningContext();
+  const { data, error } = await db.rpc("rate_revision", {
+    target: id,
     quality,
-    item.ease_factor
-  );
-
-  const nextDate = new Date();
-  nextDate.setDate(nextDate.getDate() + newInterval);
-
-  item.interval_days = newInterval;
-  item.ease_factor = newEaseFactor;
-  item.repetitions += 1;
-  item.last_quality = quality;
-  item.next_review_date = nextDate.toISOString().split("T")[0];
-  item.updated_at = new Date().toISOString();
-
-  // Log activity
-  store.activityLogs.push({
-    id: `log-${Date.now()}`,
-    user_id: item.user_id,
-    activity_type: "revision_completed",
-    activity_date: new Date().toISOString().split("T")[0],
-    count: 1,
-    metadata: { topic: item.topic, quality },
-    created_at: new Date().toISOString(),
   });
-
-  saveStore(store);
+  if (error) return { error: "Review not saved. Reload and retry." };
   revalidatePath("/revision");
-  revalidatePath("/dashboard");
-  return { success: true, nextDate: item.next_review_date, newInterval };
+  return { success: true, nextDate: data as string };
 }

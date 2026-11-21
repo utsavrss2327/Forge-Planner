@@ -39,29 +39,63 @@ export const PREPARATION_LEVELS = [
 ] as const;
 
 export const DAYS_OF_WEEK = [
-  "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
 ] as const;
 
 export const DSA_TOPICS = [
-  "Arrays", "Strings", "Linked Lists", "Stacks", "Queues",
-  "Hash Maps", "Trees", "Binary Search Trees", "Heaps",
-  "Graphs", "Dynamic Programming", "Greedy", "Backtracking",
-  "Bit Manipulation", "Math", "Sorting", "Binary Search",
-  "Two Pointers", "Sliding Window", "Recursion", "Tries",
-  "Segment Trees", "Disjoint Set",
+  "Arrays",
+  "Strings",
+  "Linked Lists",
+  "Stacks",
+  "Queues",
+  "Hash Maps",
+  "Trees",
+  "Binary Search Trees",
+  "Heaps",
+  "Graphs",
+  "Dynamic Programming",
+  "Greedy",
+  "Backtracking",
+  "Bit Manipulation",
+  "Math",
+  "Sorting",
+  "Binary Search",
+  "Two Pointers",
+  "Sliding Window",
+  "Recursion",
+  "Tries",
+  "Segment Trees",
+  "Disjoint Set",
 ] as const;
 
 export const TASK_PRIORITIES = ["low", "medium", "high", "critical"] as const;
 
 export const APPLICATION_STATUSES = [
-  "saved", "applied", "online_assessment", "interview_scheduled",
-  "interviewing", "offer", "rejected", "withdrawn",
+  "saved",
+  "applied",
+  "online_assessment",
+  "interview_scheduled",
+  "interviewing",
+  "offer",
+  "rejected",
+  "withdrawn",
 ] as const;
 
 export const NAV_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" },
   { name: "My Roadmaps", href: "/roadmaps", icon: "Map" },
   { name: "Daily Planner", href: "/planner", icon: "CalendarDays" },
+  {
+    name: "Weekly Routine Editor",
+    href: "/planner/customize",
+    icon: "CalendarDays",
+  },
   { name: "Learning Hub", href: "/learning", icon: "BookOpen" },
   { name: "AI Assessment Lab", href: "/assessments", icon: "FlaskConical" },
   { name: "DSA Practice", href: "/dsa", icon: "Code2" },

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Video as Youtube, BookOpen, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,14 +8,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PREPARATION_SUBJECTS } from "@/lib/constants";
+import { BookOpen, Plus, Sparkles, Video as Youtube } from "lucide-react";
+import { useState } from "react";
+
 import { createLearningTrackAction } from "@/app/(app)/learning/actions";
 
-export function CreateTrackDialog() {
+export function CreateTrackDialog({ subjects }: { subjects: string[] }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -55,7 +55,11 @@ export function CreateTrackDialog() {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          {error && <p role="alert" className="text-sm text-primary">{error}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-primary">
+              {error}
+            </p>
+          )}
           <div className="space-y-1.5">
             <Label className="text-xs text-text-secondary">Track Title *</Label>
             <Input
@@ -68,12 +72,18 @@ export function CreateTrackDialog() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs text-text-secondary">Subject Domain</Label>
+              <Label className="text-xs text-text-secondary">
+                Subject Domain
+              </Label>
               <select
                 name="subject"
+                required
                 className="w-full h-9 rounded-md bg-elevated border border-border px-3 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
               >
-                {PREPARATION_SUBJECTS.map((s) => (
+                {subjects.length === 0 && (
+                  <option value="">Select subjects in Settings first</option>
+                )}
+                {subjects.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
@@ -82,12 +92,16 @@ export function CreateTrackDialog() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs text-text-secondary">Priority Level</Label>
+              <Label className="text-xs text-text-secondary">
+                Priority Level
+              </Label>
               <select
                 name="priority"
                 className="w-full h-9 rounded-md bg-elevated border border-border px-3 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
               >
-                <option value="critical">Critical (Immediate placement test)</option>
+                <option value="critical">
+                  Critical (Immediate placement test)
+                </option>
                 <option value="high">High (Core requirement)</option>
                 <option value="medium">Medium (Regular schedule)</option>
                 <option value="low">Low (Supplemental)</option>
@@ -108,7 +122,9 @@ export function CreateTrackDialog() {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-text-secondary">Target Placement Outcome</Label>
+            <Label className="text-xs text-text-secondary">
+              Target Placement Outcome
+            </Label>
             <Input
               name="targetOutcome"
               placeholder="e.g. Master 1D, 2D, and Tree DP state transitions with O(1) space"
@@ -126,13 +142,17 @@ export function CreateTrackDialog() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-text-secondary">Target Completion Date</Label>
+              <Label className="text-xs text-text-secondary">
+                Target Completion Date
+              </Label>
               <Input type="date" name="deadline" className="bg-elevated" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-text-secondary">Description / Personal Strategy</Label>
+            <Label className="text-xs text-text-secondary">
+              Description / Personal Strategy
+            </Label>
             <Textarea
               name="description"
               rows={2}
@@ -150,7 +170,12 @@ export function CreateTrackDialog() {
             >
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5">
+            <Button
+              type="submit"
+              size="sm"
+              disabled={loading}
+              className="gap-1.5"
+            >
               {loading ? "Importing & Creating..." : "Save Learning Track"}
               <Sparkles className="h-3.5 w-3.5" />
             </Button>

@@ -15,7 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { getLearningTracksAction } from "../actions";
-import { TrackEditor, ImportPlaylist } from "@/components/learning/track-editor";
+import {
+  TrackEditor,
+  ImportPlaylist,
+} from "@/components/learning/track-editor";
 import { JournalEditor } from "@/components/learning/journal-editor";
 import { JournalModal } from "@/components/learning/journal-modal";
 
@@ -34,20 +37,25 @@ export default async function TrackDetailPage({ params }: TrackPageProps) {
     notFound();
   }
 
-  const playlists = store.playlists.filter((p) => p.learning_track_id === track.id);
+  const playlists = store.playlists.filter(
+    (p) => p.learning_track_id === track.id,
+  );
   const playlistIds = new Set(playlists.map((p) => p.id));
   const videos = store.videos.filter((v) => playlistIds.has(v.playlist_id));
   const completedVideos = videos.filter((v) => v.status === "completed").length;
   const percentage =
     videos.length > 0 ? Math.round((completedVideos / videos.length) * 100) : 0;
 
-
   return (
     <div className="space-y-6 pb-12">
       {/* Back button */}
       <div>
         <Link href="/learning">
-          <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-text-muted hover:text-text-primary">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-xs text-text-muted hover:text-text-primary"
+          >
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to Learning Hub
           </Button>
@@ -63,6 +71,7 @@ export default async function TrackDetailPage({ params }: TrackPageProps) {
                 <Badge variant="outline" className="text-xs font-semibold">
                   {track.subject || "Data Structures"}
                 </Badge>
+                <Badge variant="outline">{track.status}</Badge>
                 <span className="text-xs text-text-muted font-bold uppercase">
                   {track.priority} Priority
                 </span>
@@ -76,7 +85,8 @@ export default async function TrackDetailPage({ params }: TrackPageProps) {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <TrackEditor track={track} /><JournalModal trackId={track.id} />
+              <TrackEditor track={track} />
+              <JournalModal trackId={track.id} />
             </div>
           </div>
 
@@ -85,7 +95,9 @@ export default async function TrackDetailPage({ params }: TrackPageProps) {
               <Target className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <div className="text-xs">
                 <span className="text-text-muted">Target Outcome: </span>
-                <span className="text-text-primary font-semibold">{track.target_outcome}</span>
+                <span className="text-text-primary font-semibold">
+                  {track.target_outcome}
+                </span>
               </div>
             </div>
           )}
@@ -93,9 +105,12 @@ export default async function TrackDetailPage({ params }: TrackPageProps) {
           {/* Progress */}
           <div className="space-y-1.5 pt-2 border-t border-border/60">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-text-muted font-medium">Curriculum Progress</span>
+              <span className="text-text-muted font-medium">
+                Curriculum Progress
+              </span>
               <span className="text-primary font-bold">
-                {completedVideos} of {videos.length} videos completed ({percentage}%)
+                {completedVideos} of {videos.length} videos completed (
+                {percentage}%)
               </span>
             </div>
             <Progress value={percentage} className="h-2" />
@@ -104,8 +119,32 @@ export default async function TrackDetailPage({ params }: TrackPageProps) {
       </Card>
 
       <ImportPlaylist trackId={track.id} />
-      {track.notes && <section className="rounded-xl border border-border p-5"><h2 className="mb-2 font-semibold">Personal notes</h2><p className="whitespace-pre-wrap text-sm text-text-secondary">{track.notes}</p></section>}
-      {track.resource_links.length > 0 && <section className="rounded-xl border border-border p-5"><h2 className="mb-2 font-semibold">Resources</h2>{track.resource_links.filter((url) => /^https?:\/\//.test(url)).map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block break-all text-sm text-primary underline">{url}</a>)}</section>}
+      {track.notes && (
+        <section className="rounded-xl border border-border p-5">
+          <h2 className="mb-2 font-semibold">Personal notes</h2>
+          <p className="whitespace-pre-wrap text-sm text-text-secondary">
+            {track.notes}
+          </p>
+        </section>
+      )}
+      {track.resource_links.length > 0 && (
+        <section className="rounded-xl border border-border p-5">
+          <h2 className="mb-2 font-semibold">Resources</h2>
+          {track.resource_links
+            .filter((url) => /^https?:\/\//.test(url))
+            .map((url) => (
+              <a
+                key={url}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block break-all text-sm text-primary underline"
+              >
+                {url}
+              </a>
+            ))}
+        </section>
+      )}
       {/* Videos List */}
       <Card className="bg-surface border-border">
         <CardHeader className="p-5 pb-3 border-b border-border flex flex-row items-center justify-between">
@@ -140,8 +179,8 @@ export default async function TrackDetailPage({ params }: TrackPageProps) {
                     isCompleted
                       ? "bg-surface/60 border-border opacity-70"
                       : isInProgress
-                      ? "bg-elevated border-primary/40"
-                      : "bg-elevated border-border hover:border-border-light"
+                        ? "bg-elevated border-primary/40"
+                        : "bg-elevated border-border hover:border-border-light"
                   }`}
                 >
                   <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -165,7 +204,9 @@ export default async function TrackDetailPage({ params }: TrackPageProps) {
                       <div className="flex flex-wrap items-center gap-2 pt-0.5">
                         <span className="text-[11px] text-text-muted flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {durationMin === null ? "Duration unavailable" : `${durationMin} mins`}
+                          {durationMin === null
+                            ? "Duration unavailable"
+                            : `${durationMin} mins`}
                         </span>
 
                         {vid.difficulty_rating && (
@@ -175,15 +216,20 @@ export default async function TrackDetailPage({ params }: TrackPageProps) {
                           </span>
                         )}
 
-                        {vid.topics_learned && vid.topics_learned.length > 0 && (
-                          <div className="flex gap-1">
-                            {vid.topics_learned.map((topic) => (
-                              <Badge key={topic} variant="outline" className="text-[10px] py-0">
-                                {topic}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+                        {vid.topics_learned &&
+                          vid.topics_learned.length > 0 && (
+                            <div className="flex gap-1">
+                              {vid.topics_learned.map((topic) => (
+                                <Badge
+                                  key={topic}
+                                  variant="outline"
+                                  className="text-[10px] py-0"
+                                >
+                                  {topic}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                       </div>
 
                       {vid.notes && (
@@ -212,8 +258,22 @@ export default async function TrackDetailPage({ params }: TrackPageProps) {
           )}
         </CardContent>
       </Card>
-      <section className="space-y-3"><h2 className="text-lg font-semibold">Track reflections</h2>
-        {store.journals.filter((j) => j.learning_track_id === track.id).map((j) => <article key={j.id} className="space-y-3 rounded-xl border border-border bg-surface p-5"><div className="flex justify-between gap-3"><p className="text-sm text-text-muted">{j.date}</p><JournalEditor journal={j} /></div><p className="whitespace-pre-wrap text-sm">{j.summary}</p></article>)}
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Track reflections</h2>
+        {store.journals
+          .filter((j) => j.learning_track_id === track.id)
+          .map((j) => (
+            <article
+              key={j.id}
+              className="space-y-3 rounded-xl border border-border bg-surface p-5"
+            >
+              <div className="flex justify-between gap-3">
+                <p className="text-sm text-text-muted">{j.date}</p>
+                <JournalEditor journal={j} />
+              </div>
+              <p className="whitespace-pre-wrap text-sm">{j.summary}</p>
+            </article>
+          ))}
       </section>
     </div>
   );

@@ -1,15 +1,22 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-test("foundation journey persists learning, notes, preferences, tasks and timer segments", async ({ page, context }) => {
-  await context.route("https://www.youtube-nocookie.com/**", (route) => route.abort());
-  await page.goto("/dashboard"); await expect(page).toHaveURL(/\/login$/);
+test("foundation journey persists learning, notes, preferences, tasks and timer segments", async ({
+  page,
+  context,
+}) => {
+  await context.route("https://www.youtube-nocookie.com/**", (route) =>
+    route.abort(),
+  );
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/login$/);
   expect((await context.request.get("/api/account/export")).status()).toBe(401);
   await page.locator('input[name="email"]').fill("browser-student@example.com");
   await page.locator('input[name="password"]').fill("local-demo-password");
   await page.getByRole("button", { name: "Sign In", exact: true }).click();
-  await expect(page).toHaveURL(/\/dashboard$/); await expect(page.getByText("Demo mode —", { exact: false })).toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByText("Demo mode —", { exact: false })).toBeVisible();
 
   await page.goto("/onboarding");
   await page.locator('input[name="fullName"]:visible').fill("Browser Student");
@@ -17,88 +24,199 @@ test("foundation journey persists learning, notes, preferences, tasks and timer 
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByRole("button", { name: "Continue", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Review & Launch Your OS" })).toBeVisible();
-  await page.getByRole("button", { name: "Start Your Preparation Journey" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await page.goto("/settings"); await expect(page.getByText("Browser Student ·", { exact: false })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Review & Launch Your OS" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Start Your Preparation Journey" })
+    .click();
+  await expect(page).toHaveURL(/\/roadmaps\/new$/);
+  await page.goto("/settings");
+  await expect(
+    page.getByText("Browser Student ·", { exact: false }),
+  ).toBeVisible();
 
-  await page.goto("/learning"); await page.getByRole("button", { name: "Create Learning Track" }).click();
+  await page.goto("/learning");
+  await page.getByRole("button", { name: "Create Learning Track" }).click();
   const trackDialog = page.getByRole("dialog");
   await trackDialog.locator('[name="title"]').fill("Browser foundation track");
-  await trackDialog.locator('[name="playlistUrl"]').fill("https://invalid.example/playlist?list=PLabcdefghijk");
-  await trackDialog.getByRole("button", { name: "Save Learning Track" }).click();
+  await trackDialog
+    .locator('[name="playlistUrl"]')
+    .fill("https://invalid.example/playlist?list=PLabcdefghijk");
+  await trackDialog
+    .getByRole("button", { name: "Save Learning Track" })
+    .click();
   await expect(trackDialog.getByRole("alert")).toContainText("valid YouTube");
   await trackDialog.locator('[name="playlistUrl"]').fill("");
-  await trackDialog.getByRole("button", { name: "Save Learning Track" }).click();
+  await trackDialog
+    .getByRole("button", { name: "Save Learning Track" })
+    .click();
   await expect(trackDialog).not.toBeVisible();
-  await page.getByRole("link", { name: "Browser foundation track", exact: true }).click();
-  await page.locator('[name="playlistUrl"]').fill("https://youtube.com/playlist?list=PLabcdefghijk");
-  await page.getByRole("button", { name: "Import playlist", exact: true }).click();
-  await expect(page.getByRole("status").filter({ hasText: "YouTube API key" })).toBeVisible();
+  await page
+    .getByRole("link", { name: "Browser foundation track", exact: true })
+    .click();
+  await page
+    .locator('[name="playlistUrl"]')
+    .fill("https://youtube.com/playlist?list=PLabcdefghijk");
+  await page
+    .getByRole("button", { name: "Import playlist", exact: true })
+    .click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "YouTube API key" }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "What Did You Learn Today?" }).click();
   const journalDialog = page.getByRole("dialog");
-  await journalDialog.locator('[name="summary"]').fill("A transaction is atomic: either all changes commit or none do.");
-  await journalDialog.locator('[name="concepts"]').fill("Atomicity, Transactions");
-  await journalDialog.getByRole("button", { name: "Save Learning Entry" }).click();
-  await expect(journalDialog).not.toBeVisible(); await page.reload();
-  await expect(page.getByText("A transaction is atomic:", { exact: false })).toBeVisible();
+  await journalDialog
+    .locator('[name="summary"]')
+    .fill("A transaction is atomic: either all changes commit or none do.");
+  await journalDialog
+    .locator('[name="concepts"]')
+    .fill("Atomicity, Transactions");
+  await journalDialog
+    .getByRole("button", { name: "Save Learning Entry" })
+    .click();
+  await expect(journalDialog).not.toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByText("A transaction is atomic:", { exact: false }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Edit reflection" }).click();
-  await page.getByRole("dialog").locator('[name="summary"]').fill("Atomicity prevents partial transaction commits.");
-  await page.getByRole("button", { name: "Save reflection", exact: true }).click();
+  await page
+    .getByRole("dialog")
+    .locator('[name="summary"]')
+    .fill("Atomicity prevents partial transaction commits.");
+  await page
+    .getByRole("button", { name: "Save reflection", exact: true })
+    .click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
 
+  await expect(
+    page.getByText("Atomicity prevents partial transaction commits.", {
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.goto("/learning/track-striver-dsa/video/vid-3");
-  await page.getByLabel("Notes and questions").fill("The sorted half determines which search boundary to move.");
+  await page
+    .getByLabel("Notes and questions")
+    .fill("The sorted half determines which search boundary to move.");
   await page.getByLabel("Study status").selectOption("completed");
   await page.getByRole("button", { name: "Save progress and notes" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Progress and notes saved" })).toBeVisible();
-  await page.reload(); await expect(page.getByLabel("Study status")).toHaveValue("completed");
-  await expect(page.getByLabel("Notes and questions")).toHaveValue("The sorted half determines which search boundary to move.");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Progress and notes saved" }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Study status")).toHaveValue("completed");
+  await expect(page.getByLabel("Notes and questions")).toHaveValue(
+    "The sorted half determines which search boundary to move.",
+  );
 
-  await page.goto("/planner"); await page.getByRole("button", { name: "Add study task" }).first().click();
+  await page.goto("/planner");
+  await page.getByRole("button", { name: "Add study task" }).first().click();
   const taskDialog = page.getByRole("dialog");
   await taskDialog.getByLabel("Task title").fill("Browser timer practice");
   await taskDialog.getByLabel("Estimated minutes").fill("15");
-  await taskDialog.getByLabel("Allow exceeding configured capacity", { exact: false }).check();
-  await taskDialog.getByRole("button", { name: "Save task", exact: true }).click();
+  await taskDialog
+    .getByLabel("Allow exceeding configured capacity", { exact: false })
+    .check();
+  await taskDialog
+    .getByRole("button", { name: "Save task", exact: true })
+    .click();
   await expect(taskDialog).not.toBeVisible();
-  const taskRow = page.locator('div.rounded-xl').filter({ has: page.getByText("Browser timer practice", { exact: true }) }).filter({ has: page.getByRole("button", { name: "Start", exact: true }) }).last();
+  const taskRow = page
+    .locator("div.rounded-xl")
+    .filter({ has: page.getByText("Browser timer practice", { exact: true }) })
+    .filter({ has: page.getByRole("button", { name: "Start", exact: true }) })
+    .last();
   await taskRow.getByRole("button", { name: "Start", exact: true }).click();
-  await expect(page.getByText("Study session running", { exact: true })).toBeVisible(); await page.reload();
-  await expect(page.getByText("Study session running", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Pause session", exact: true }).click();
-  await expect(page.getByText("Study session running", { exact: true })).not.toBeVisible();
-  await expect(page.getByRole("heading", { name: "Recorded study sessions" })).toBeVisible();
-  const store = JSON.parse(readFileSync(join(process.env.FORGE_E2E_DATA_DIR!, "store.json"), "utf8"));
-  const savedTask = store.dailyTasks.find((item: { title: string }) => item.title === "Browser timer practice");
-  expect(store.studySessions.filter((s: { task_id: string; ended_at: string | null }) => s.task_id === savedTask.id && s.ended_at)).toHaveLength(1);
+  await expect(
+    page.getByText("Study session running", { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByText("Study session running", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Pause session", exact: true })
+    .click();
+  await expect(
+    page.getByText("Study session running", { exact: true }),
+  ).not.toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Recorded study sessions" }),
+  ).toBeVisible();
+  const store = JSON.parse(
+    readFileSync(join(process.env.FORGE_E2E_DATA_DIR!, "store.json"), "utf8"),
+  );
+  const savedTask = store.dailyTasks.find(
+    (item: { title: string }) => item.title === "Browser timer practice",
+  );
+  expect(
+    store.studySessions.filter(
+      (s: { task_id: string; ended_at: string | null }) =>
+        s.task_id === savedTask.id && s.ended_at,
+    ),
+  ).toHaveLength(1);
 
-  await page.goto("/learning?q=partial%20transaction"); await expect(page.getByText("Atomicity prevents partial transaction commits.", { exact: true })).toBeVisible();
-  const exported = await context.request.get("/api/account/export"); expect(exported.ok()).toBe(true);
-  const data = await exported.json(); expect(data.demo).toBe(true);
-  expect(data.data.learningTracks.some((t: { title: string }) => t.title === "Browser foundation track")).toBe(true);
-  await page.goto("/settings"); await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.goto("/learning?q=partial%20transaction");
+  await expect(
+    page.getByText("Atomicity prevents partial transaction commits.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  const exported = await context.request.get("/api/account/export");
+  expect(exported.ok()).toBe(true);
+  const data = await exported.json();
+  expect(data.demo).toBe(true);
+  expect(
+    data.data.learningTracks.some(
+      (t: { title: string }) => t.title === "Browser foundation track",
+    ),
+  ).toBe(true);
+  await page.goto("/settings");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    page.getByRole("heading", { name: "Settings", exact: true }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/learning?q=Browser%20foundation%20track");
-  await page.getByRole("link", { name: "Browser foundation track", exact: true }).click();
+  await page
+    .getByRole("link", { name: "Browser foundation track", exact: true })
+    .click();
   await page.getByRole("button", { name: "Edit track", exact: true }).click();
-  await page.getByRole("dialog").getByRole("combobox", { name: "Status", exact: true }).selectOption("archived");
+  await page
+    .getByRole("dialog")
+    .getByRole("combobox", { name: "Status", exact: true })
+    .selectOption("archived");
   await page.getByRole("button", { name: "Save track", exact: true }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(page.getByText("archived", { exact: true })).toBeVisible();
   await page.goto("/learning?q=Browser%20foundation%20track");
-  await expect(page.getByText("archived", { exact: false }).first()).toBeVisible();
+  await expect(
+    page.getByText("archived", { exact: false }).first(),
+  ).toBeVisible();
   await page.goto("/settings");
-  await page.getByLabel("Type DELETE MY PREPARATION DATA", { exact: true }).fill("DELETE MY PREPARATION DATA");
-  await page.getByRole("button", { name: "Delete preparation data", exact: true }).click();
+  await page
+    .getByLabel("Type DELETE MY PREPARATION DATA", { exact: true })
+    .fill("DELETE MY PREPARATION DATA");
+  await page
+    .getByRole("button", { name: "Delete preparation data", exact: true })
+    .click();
   await expect(page).toHaveURL(/\/onboarding$/);
   await expect(page.locator('input[name="fullName"]:visible')).toHaveValue("");
-  const cleared = await (await context.request.get("/api/account/export")).json();
-  expect(cleared.data.learningTracks).toHaveLength(0); expect(cleared.data.studySessions).toHaveLength(0);
-  await page.getByRole("button", { name: "Open user menu", exact: true }).click();
+  const cleared = await (
+    await context.request.get("/api/account/export")
+  ).json();
+  expect(cleared.data.learningTracks).toHaveLength(0);
+  expect(cleared.data.studySessions).toHaveLength(0);
+  await page
+    .getByRole("button", { name: "Open user menu", exact: true })
+    .click();
   await page.getByRole("menuitem", { name: "Sign Out", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   expect((await context.request.get("/api/account/export")).status()).toBe(401);
-
 });

@@ -1,5 +1,5 @@
-import { RotateCcw, Brain, Calendar, Sparkles, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { RotateCcw } from "lucide-react";
 import { getRevisionDataAction } from "./actions";
 import { RevisionClient } from "./revision-client";
 
@@ -17,7 +17,8 @@ export default async function RevisionPage() {
           Spaced Repetition & Revision Center
         </h1>
         <p className="text-xs sm:text-sm text-text-muted mt-1">
-          Review concepts at algorithmically scheduled intervals (1d, 3d, 7d, 14d, 30d) to ensure permanent memory.
+          Review concepts at algorithmically scheduled intervals (1d, 3d, 7d,
+          14d, 30d) to ensure permanent memory.
         </p>
       </div>
 
@@ -25,7 +26,9 @@ export default async function RevisionPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card className="bg-surface border-border">
           <CardContent className="p-4">
-            <span className="text-xs text-text-muted font-medium">Due Today</span>
+            <span className="text-xs text-text-muted font-medium">
+              Due Today
+            </span>
             <div className="text-2xl font-black text-primary mt-1">
               {data.dueItems.length}
             </div>
@@ -35,7 +38,9 @@ export default async function RevisionPage() {
 
         <Card className="bg-surface border-border">
           <CardContent className="p-4">
-            <span className="text-xs text-text-muted font-medium">Reviewed Today</span>
+            <span className="text-xs text-text-muted font-medium">
+              Reviewed Today
+            </span>
             <div className="text-2xl font-black text-success mt-1">
               {data.completedToday}
             </div>
@@ -45,17 +50,23 @@ export default async function RevisionPage() {
 
         <Card className="bg-surface border-border">
           <CardContent className="p-4">
-            <span className="text-xs text-text-muted font-medium">Upcoming Queue</span>
+            <span className="text-xs text-text-muted font-medium">
+              Upcoming Queue
+            </span>
             <div className="text-2xl font-black text-text-primary mt-1">
               {data.upcomingItems.length}
             </div>
-            <span className="text-[11px] text-text-muted">Future Intervals</span>
+            <span className="text-[11px] text-text-muted">
+              Future Intervals
+            </span>
           </CardContent>
         </Card>
 
         <Card className="bg-surface border-border">
           <CardContent className="p-4">
-            <span className="text-xs text-text-muted font-medium">Algorithm</span>
+            <span className="text-xs text-text-muted font-medium">
+              Algorithm
+            </span>
             <div className="text-2xl font-black text-text-primary mt-1">
               SM-2
             </div>

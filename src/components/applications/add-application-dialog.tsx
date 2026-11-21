@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Briefcase, Building, MapPin, Link2 } from "lucide-react";
+import { createApplicationAction } from "@/app/(app)/applications/actions";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,24 +9,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { APPLICATION_STATUSES } from "@/lib/constants";
-import { createApplicationAction } from "@/app/(app)/applications/actions";
+import { Briefcase, Plus } from "lucide-react";
+import { useState } from "react";
 
 export function AddApplicationDialog() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    await createApplicationAction(formData);
-    setLoading(false);
-    setOpen(false);
+    setError("");
+    try {
+      const result = await createApplicationAction(formData);
+      if (result.error) setError(result.error);
+      else setOpen(false);
+    } catch {
+      setError("Could not save. Please retry.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,9 +55,16 @@ export function AddApplicationDialog() {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          {error && (
+            <p role="alert" className="forge-error">
+              {error}
+            </p>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs text-text-secondary">Company Name *</Label>
+              <Label className="text-xs text-text-secondary">
+                Company Name *
+              </Label>
               <Input
                 name="company"
                 required
@@ -59,7 +74,9 @@ export function AddApplicationDialog() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs text-text-secondary">Job Role / Title *</Label>
+              <Label className="text-xs text-text-secondary">
+                Job Role / Title *
+              </Label>
               <Input
                 name="role"
                 required
@@ -71,7 +88,9 @@ export function AddApplicationDialog() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs text-text-secondary">Pipeline Status</Label>
+              <Label className="text-xs text-text-secondary">
+                Pipeline Status
+              </Label>
               <select
                 name="status"
                 defaultValue="applied"
@@ -97,7 +116,9 @@ export function AddApplicationDialog() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs text-text-secondary">Job Description URL</Label>
+              <Label className="text-xs text-text-secondary">
+                Job Description URL
+              </Label>
               <Input
                 name="jobUrl"
                 placeholder="https://careers.google.com/..."
@@ -106,7 +127,9 @@ export function AddApplicationDialog() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs text-text-secondary">Referral / Source</Label>
+              <Label className="text-xs text-text-secondary">
+                Referral / Source
+              </Label>
               <Input
                 name="referralStatus"
                 placeholder="e.g. Senior SWE Referral / LinkedIn"
@@ -117,7 +140,9 @@ export function AddApplicationDialog() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs text-text-secondary">Compensation Range</Label>
+              <Label className="text-xs text-text-secondary">
+                Compensation Range
+              </Label>
               <Input
                 name="salaryRange"
                 placeholder="e.g. ₹28L - ₹36L CTC"
@@ -126,13 +151,17 @@ export function AddApplicationDialog() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs text-text-secondary">Application Deadline</Label>
+              <Label className="text-xs text-text-secondary">
+                Application Deadline
+              </Label>
               <Input type="date" name="deadline" className="bg-elevated" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-text-secondary">Interview Strategy & Notes</Label>
+            <Label className="text-xs text-text-secondary">
+              Interview Strategy & Notes
+            </Label>
             <Textarea
               name="notes"
               rows={3}
@@ -150,7 +179,12 @@ export function AddApplicationDialog() {
             >
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5">
+            <Button
+              type="submit"
+              size="sm"
+              disabled={loading}
+              className="gap-1.5"
+            >
               {loading ? "Adding..." : "Add to Pipeline"}
             </Button>
           </div>

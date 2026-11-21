@@ -8,25 +8,38 @@ export type PhaseStatus = "pending" | "in_progress" | "completed";
 export type MilestoneStatus = "pending" | "in_progress" | "completed";
 export type TopicStatus = "pending" | "in_progress" | "completed";
 
-export type LearningTrackStatus = "active" | "paused" | "completed" | "archived";
+export type LearningTrackStatus =
+  "active" | "paused" | "completed" | "archived";
 export type VideoStatus = "not_started" | "in_progress" | "completed";
 
 export type TaskPriority = "low" | "medium" | "high" | "critical";
-export type TaskStatus = "pending" | "in_progress" | "completed" | "skipped" | "rescheduled";
+export type TaskStatus =
+  "pending" | "in_progress" | "completed" | "skipped" | "rescheduled";
 export type TaskSource = "manual" | "roadmap" | "revision" | "ai";
 
-export type AssessmentStatus = "draft" | "in_progress" | "submitted" | "evaluated";
-export type QuestionSection = "concept_recall" | "conceptual_understanding" | "practical_application";
+export type AssessmentStatus =
+  "draft" | "in_progress" | "submitted" | "evaluated";
+export type QuestionSection =
+  "concept_recall" | "conceptual_understanding" | "practical_application";
 export type QuestionType = "mcq" | "short_answer" | "coding";
 export type Difficulty = "easy" | "medium" | "hard";
 
-export type MasteryLevel = "not_started" | "beginner" | "developing" | "proficient" | "strong" | "mastered";
+export type MasteryLevel =
+  | "not_started"
+  | "beginner"
+  | "developing"
+  | "proficient"
+  | "strong"
+  | "mastered";
 
-export type RevisionItemType = "concept" | "flashcard" | "question" | "code_snippet";
+export type RevisionItemType =
+  "concept" | "flashcard" | "question" | "code_snippet";
 export type RevisionStatus = "active" | "suspended" | "completed";
 
-export type DSAPlatform = "leetcode" | "geeksforgeeks" | "codeforces" | "hackerrank" | "other";
-export type DSAProblemStatus = "pending" | "attempted" | "solved" | "revision_needed";
+export type DSAPlatform =
+  "leetcode" | "geeksforgeeks" | "codeforces" | "hackerrank" | "other";
+export type DSAProblemStatus =
+  "pending" | "attempted" | "solved" | "revision_needed";
 
 export type ApplicationStatus =
   | "saved"
@@ -55,6 +68,11 @@ export type StudyPreference = "structured" | "flexible";
 // ============================================
 
 export interface Profile {
+  planning_preferences?: {
+    windows?: import("@/lib/routine/schema").Routine["windows"];
+    rules?: import("@/lib/routine/schema").Routine["rules"];
+    maxSubjects?: number;
+  };
   id: string;
   full_name: string | null;
   avatar_url: string | null;
@@ -213,6 +231,9 @@ export interface PlaylistVideo {
 // ============================================
 
 export interface DailyTask {
+  scheduled_start?: number | null;
+  routine_id?: string | null;
+  routine_session_id?: string | null;
   id: string;
   user_id: string;
   roadmap_id: string | null;

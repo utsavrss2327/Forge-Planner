@@ -21,3 +21,7 @@ The five sequential foundation increments are implemented: identity/preferences,
 ## Foundation acceptance
 
 Local checks cover authenticated ownership, invalid input, stale writes, real metadata boundaries, reversible progress, one running timer, refresh recovery, capacity/rest-day warnings, preserved session history, private export and caller-only data deletion. The browser journey uses isolated demo data; PostgreSQL tests use the actual migrations with an Auth-schema fixture. Hosted integrations require the separate checks above.
+
+## Expanded core workflow — 2026-11-21
+
+The new master specification prioritizes subject personalization, reviewed roadmap creation/import, deterministic weekly scheduling, an interactive routine editor and explicit approval before planner activation. Implement against the existing Supabase schema, preserving foundation data. Add draft/version/lock enforcement and transactional activation before assessments. Then replace prototype assessment grading with validated sourced questions and rubric evaluation using configurable free-tier providers. Never enable prototype modules merely by removing disabled navigation.

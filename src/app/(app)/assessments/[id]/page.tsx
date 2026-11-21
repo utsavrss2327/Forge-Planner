@@ -1,25 +1,27 @@
-import { notFound } from "next/navigation";
+export const maxDuration = 120;
+import { ExamRunner } from "@/components/assessment/runner";
+import { notFound, redirect } from "next/navigation";
 import { getAssessmentByIdAction } from "../actions";
-import { TestRunnerClient } from "./test-runner-client";
-
-export const dynamic = "force-dynamic";
-
-interface AssessmentPageProps {
+export default async function AssessmentPage({
+  params,
+}: {
   params: Promise<{ id: string }>;
-}
-
-export default async function AssessmentPage({ params }: AssessmentPageProps) {
-  const { id } = await params;
-  const data = await getAssessmentByIdAction(id);
-
+}) {
+  const { id } = await params,
+    data = await getAssessmentByIdAction(id);
   if (!data) notFound();
-
+  if (data.assessment.status === "evaluated")
+    redirect(`/assessments/${id}/results`);
   return (
-    <div className="pb-12">
-      <TestRunnerClient
-        assessment={data.assessment}
-        questions={data.questions}
-      />
-    </div>
+    <ExamRunner
+      id={id}
+      title={data.assessment.title}
+      state={data.assessment.status}
+      deadline={data.assessment.deadline_at}
+      questions={data.questions}
+      savedAnswers={Object.fromEntries(
+        data.answers.map((a) => [a.question_id, a.user_answer]),
+      )}
+    />
   );
 }

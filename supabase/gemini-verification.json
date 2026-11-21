@@ -1,0 +1,14 @@
+{
+  "verifiedAt": "2026-11-21T06:28:57.128Z",
+  "provider": "gemini",
+  "model": "gemini-3.1-flash-lite",
+  "fixtureSources": 17,
+  "subjects": 5,
+  "questions": 7,
+  "durationMinutes": 60,
+  "generationSchemaValidated": true,
+  "gradingSchemaValidated": true,
+  "unrelatedWrittenAnswerScore": 0,
+  "productionDatabaseWrites": false,
+  "limitations": "Nonpersonal provider fixture; not a signed-in production exam or code-execution test."
+}

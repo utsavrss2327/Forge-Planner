@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Code2, ExternalLink } from "lucide-react";
+import { createDsaProblemAction } from "@/app/(app)/dsa/actions";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,24 +9,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DSA_TOPICS } from "@/lib/constants";
-import { createDsaProblemAction } from "@/app/(app)/dsa/actions";
+import { Code2, Plus } from "lucide-react";
+import { useState } from "react";
 
 export function AddProblemDialog() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    await createDsaProblemAction(formData);
-    setLoading(false);
-    setOpen(false);
+    setError("");
+    try {
+      const result = await createDsaProblemAction(formData);
+      if (result.error) setError(result.error);
+      else setOpen(false);
+    } catch {
+      setError("Could not save. Please retry.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,8 +55,15 @@ export function AddProblemDialog() {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          {error && (
+            <p role="alert" className="forge-error">
+              {error}
+            </p>
+          )}
           <div className="space-y-1.5">
-            <Label className="text-xs text-text-secondary">Problem Name *</Label>
+            <Label className="text-xs text-text-secondary">
+              Problem Name *
+            </Label>
             <Input
               name="name"
               required
@@ -108,7 +123,9 @@ export function AddProblemDialog() {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-text-secondary">Time Spent (Minutes)</Label>
+            <Label className="text-xs text-text-secondary">
+              Time Spent (Minutes)
+            </Label>
             <Input
               type="number"
               name="timeTaken"
@@ -118,7 +135,9 @@ export function AddProblemDialog() {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-text-secondary">Solution Approach & Invariants</Label>
+            <Label className="text-xs text-text-secondary">
+              Solution Approach & Invariants
+            </Label>
             <Textarea
               name="solutionNotes"
               rows={2}
@@ -128,7 +147,9 @@ export function AddProblemDialog() {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-text-secondary">Mistakes / Tricky Edge Cases</Label>
+            <Label className="text-xs text-text-secondary">
+              Mistakes / Tricky Edge Cases
+            </Label>
             <Textarea
               name="mistakes"
               rows={2}
@@ -145,7 +166,10 @@ export function AddProblemDialog() {
               value="true"
               className="accent-primary rounded"
             />
-            <Label htmlFor="needsRevision" className="text-xs text-text-secondary cursor-pointer">
+            <Label
+              htmlFor="needsRevision"
+              className="text-xs text-text-secondary cursor-pointer"
+            >
               Queue for Spaced Repetition Revision
             </Label>
           </div>
@@ -159,7 +183,12 @@ export function AddProblemDialog() {
             >
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="gap-1.5">
+            <Button
+              type="submit"
+              size="sm"
+              disabled={loading}
+              className="gap-1.5"
+            >
               {loading ? "Saving..." : "Log Problem"}
             </Button>
           </div>
